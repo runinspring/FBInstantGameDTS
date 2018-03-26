@@ -1,4 +1,4 @@
-#API 说明 v1.0
+#API 说明 v1.1
 
 ##FBInstant
 
@@ -13,7 +13,8 @@ Instant Games SDK 的顶级命名空间.
 ##FBInstant.platform
 当前游戏运行在哪个平台，返回值为：'iOS', 'android' 和 'web'。
 注意，只有FBInstant.initializeAsync()获得回调以后，才能调用这个api。
-
+##FBInstant.sdkVersion
+获取SDK的版本号，例如 "1.1"。
 ##FBInstant.initializeAsync
 获取SDK初始化结束的回调方法，应当在其他API使用前调用。
 代码示例：
@@ -53,6 +54,25 @@ FBInstant.startGameAsync().then(function() {
 
 ##FBInstant.player.id
 玩家的唯一标识ID。一个Facebook用户的id是不会改变的。目前暂时只在同一设备上保持一致，未来最终会在不同的设备之间保持一致。同一个Facebook的用户，在不同的游戏里会有不用的id。
+
+##FBInstant.player.getDataAsync
+取回当前用户在平台储存的数据
+**参数**
+•	keys  **Array &lt;String>**  要获取的数据的key值
+返回值 [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) &lt;Object> 如果发送的Key存在，则通过Promise 返回储存的数据对象.
+
+##FBInstant.player.setDataAsync
+把当前用户的数据储存在平台上。
+**参数**
+•	data  **Object**  包含key-value的数据对象.
+返回值 [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) 数据储存成功会返回一个promise
+
+##FBInstant.context
+当前游戏的来源信息
+
+##FBInstant.context.id
+当前游戏来源的唯一id。例如你的信息流中有很多好友都发了这个游戏，通过这个id来知道你玩的是哪一个。注意，必须在FBInstant.startGameAsync的回调后才能得到这个id。在FBInstant.endGameAsync的回调后可能会更新这个id。如果平台不支持，或者是在独立页面玩的游戏，这个id值为null
+
 
 ##FBInstant.setScore
 
