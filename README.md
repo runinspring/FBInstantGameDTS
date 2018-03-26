@@ -1,4 +1,4 @@
-# Facebook InstantGame API v4.1 说明
+# Facebook InstantGame API v5.0 说明
 
 # FBInstant
 
@@ -9,18 +9,18 @@ Instant Games SDK 的顶级命名空间.
 
 ### getID()
 玩家的唯一标识ID。一个Facebook用户的id是不会改变的。同一个Facebook的用户，在不同的游戏里会有不用的id。
-注意，该方法必须放在 FBInstant.initializeAsync() 的回调里。
+注意，该方法必须在 FBInstant.initializeAsync() 调用之后使用
 
 **代码示例：**
 
 ```
-// 该方法必须放在 FBInstant.initializeAsync() 的回调里
+// 该方法必须在 FBInstant.initializeAsync() 调用之后使用
 var playerID = FBInstant.player.getID();
 ```
 返回值：**string**，用户的唯一ID
 
 ### getSignedPlayerInfoAsync( )
-获取玩家的唯一ID和一个签名，签名用来验证该 ID 来自 Facebook ，没有被篡改。该方法必须放在 FBInstant.initializeAsync() 的回调里。
+获取玩家的唯一ID和一个签名，签名用来验证该 ID 来自 Facebook ，没有被篡改。该方法必须在 FBInstant.initializeAsync() 调用之后使用
 
 **参数**
 
@@ -29,7 +29,7 @@ var playerID = FBInstant.player.getID();
 **代码示例**
 
 ```
-该方法必须放在 FBInstant.initializeAsync() 的回调里。
+该方法必须在 FBInstant.initializeAsync() 调用之后使用
 // resolves.
 FBInstant.player.getSignedPlayerInfoAsync('my_metadata')
   .then(function (result) {
@@ -51,25 +51,26 @@ FBInstant.player.getSignedPlayerInfoAsync('my_metadata')
 
 ### getName()
 用户的名字。
-注意，该方法必须放在 FBInstant.initializeAsync() 的回调里。
+注意，该方法必须在 FBInstant.initializeAsync() 调用之后使用
 
 代码示例：
 
 ```
-//该方法必须放在 FBInstant.initializeAsync() 的回调里。
+//该方法必须在 FBInstant.initializeAsync() 调用之后使用
 var playerName = FBInstant.player.getName();
 ```
 返回值：**string**，用户的名字
 
 ### getPhoto()
 用户头像的链接地址。头像的图片始终为正方形，尺寸最小为200x200。建议在游戏中使用的时候，先将图像缩放到所需的大小。
-注意，该方法必须放在 FBInstant.initializeAsync() 的回调里。
+注意，该方法必须在 FBInstant.initializeAsync() 调用之后使用
+
 警告：由于跨域的问题，在 canvas 里使用图片会有问题。要防止此情况，请将图像的 cross-origin 属性设置为 "anonymous"
 
 代码示例：
 
 ```
-//该方法必须放在 FBInstant.initializeAsync() 的回调里。
+//该方法必须在 FBInstant.initializeAsync() 调用之后使用
 var playerImage = new Image();
 playerImage.crossOrigin = 'anonymous';
 playerImage.src = FBInstant.player.getPhoto();
@@ -81,6 +82,7 @@ playerImage.src = FBInstant.player.getPhoto();
 取回当前用户在FB平台储存的数据
 
 **参数**
+
 •	keys  **Array &lt;String>**  一个用来检索数据的key的数组
 
 代码示例：
@@ -103,7 +105,9 @@ FBInstant.player
 ### setDataAsync()
 把当前用户的数据储存在FB平台上。每个用户可以在每个游戏里储存1MB的数据。
 代码示例：
+
 **参数**
+
 •	data  **Object**  需要储存的数据，包含key-value的数据对象。对象只能包含可以序列化的值，任何不可序列化的值都会导致储存失败。
 
 代码示例：
@@ -148,6 +152,93 @@ FBInstant.player
 *  Throws **CLIENT_REQUIRES_UPDATE**
   
 返回值 [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) 数据储存成功会返回一个promise，如果保存失败则返回拒绝
+
+### getStatsAsync()
+从云存储中获取当前玩家数据。
+
+**参数**
+
+•	keys  **Array &lt;String>？**  一个用来检索状态数据的key的数组(可选)。如果没有参数，将返回所有状态
+
+代码示例：
+
+```
+FBInstant.player
+  .getStatsAsync(['level', 'zombiesSlain'])
+  .then(function(stats) {
+    console.log('stats are loaded');
+    var level = stats['level'];
+    var zombiesSlain = stats['zombiesSlain'];
+  });
+```
+•	Throws **INVALID_PARAM**
+
+•	Throws **NETWORK_FAILURE**
+
+•	Throws **CLIENT_UNSUPPORTED_OPERATION**
+
+返回值： **Promise&lt;Object>** 输入的数组作为键值的对象.
+
+### setStatsAsync()
+把当前玩家数据储存到云空间里。
+
+**参数**
+
+•	stats  **Object**  一个包含了key-value的对象，将被持久化的存储到云端，它可以在各种方法中使用。该对象只能使用数字作为value，任何非数值类型都会导致存储失败。
+
+代码示例：
+
+```
+FBInstant.player
+  .setStatsAsync({
+    level: 5,
+    zombiesSlain: 27,
+  })
+  .then(function() {
+    console.log('data is set');
+  });
+```
+•	Throws **INVALID_PARAM**
+
+•	Throws **NETWORK_FAILURE**
+
+•	Throws **PENDING_REQUEST**
+
+•	Throws **CLIENT_UNSUPPORTED_OPERATION**
+
+返回值： **Promise** 当数据提交了以后会返回一个 promise。 注意：这个promise 并不意味着这个数据已经被成功保存。它只是验证了数据的有效性，并且随后会被保存。可以保证的是，在调用 player.getStatsAsync 方法时，这些设定的数据会生效。
+
+### incrementStatsAsync()
+把当前玩家数据增量更新储存到云空间里。
+
+**参数**
+
+•	increments  **Object**  一个包含了key-value的对象，它表明了哪个 stat 的值会增量更新。该对象只能使用数字作为value，任何非数值类型都会导致存储失败。
+
+代码示例：
+
+```
+FBInstant.player
+  .incrementStatsAsync({
+    level: 1,
+    zombiesSlain: 17,
+    rank: -1,
+  })
+ .then(function(stats) {
+    console.log('increments have been made! New values');
+    var level = stats['level'];
+    var zombiesSlain = stats['zombiesSlain'];
+  });
+```
+•	Throws **INVALID_PARAM**
+
+•	Throws **NETWORK_FAILURE**
+
+•	Throws **PENDING_REQUEST**
+
+•	Throws **CLIENT_UNSUPPORTED_OPERATION**
+
+返回值： **Promise** 当数据提交了以后会返回一个 promise。 注意：这个promise 并不意味着这个数据已经被成功保存。它只是验证了数据的有效性，并且随后会被保存。可以保证的是，在调用 player.getStatsAsync 方法时，这些设定的数据会生效。
 
 ### getConnectedPlayersAsync()
 获取和当前玩家有关联的玩家列表信息（即好友列表）。
@@ -272,13 +363,13 @@ FBInstant.context
 
 **参数**
 
-•	options **Object**  提供可选择的环境对象。
+•	options **Object?**  提供可选择的环境对象。
 
-•	options.filters **Array**<ContextFilter>设置一组应用于环境对象的过滤器.
+•	options.filters **Array&lt; ContextFilter>?** 设置一组应用于环境对象的过滤器.
 
-•	options.maxSize **number** 理想情况下，环境对象的最大值
+•	options.maxSize **number?** 理想情况下，环境对象的最大值
 
-•	options.minSize **number** 理想情况下，环境对象的最小值
+•	options.minSize **number?** 理想情况下，环境对象的最小值
 
 代码示例：
 
@@ -371,26 +462,26 @@ var contextPlayers = FBInstant.context.getPlayersAsync()
 
 获取用户的地域信息。 例如 **zh_CN**、 **en_US**
 全部的地域信息数据，请看此链接 https://www.facebook.com/translations/FacebookLocales.xml 。使用这个值用来确定游戏中应该显示那种语言。
-该方法必须放在 FBInstant.initializeAsync() 的回调里。
+该方法必须在 FBInstant.initializeAsync() 调用之后使用
 
 代码示例：
 
 ```
-// 该方法必须放在 FBInstant.initializeAsync() 的回调里
+// 该方法必须在 FBInstant.initializeAsync() 调用之后使用
 var locale = FBInstant.getLocale(); // 'en_US'
 ```
-返回值 string，当前地域信息。
+返回值 **string**，当前地域信息。
 
 ### getPlatform()
-当前游戏运行在哪个平台。该方法必须放在 FBInstant.initializeAsync() 的回调里
+当前游戏运行在哪个平台。该方法必须在 FBInstant.initializeAsync() 调用之后使用
 
 代码示例：
 
 ```
-该方法必须放在 FBInstant.initializeAsync() 的回调里
+该方法必须在 FBInstant.initializeAsync() 调用之后使用
 var platform = FBInstant.getPlatform(); // 'IOS'
 ```
-返回值 string，当前游戏运行的平台("IOS" | "ANDROID" | "WEB" | "MOBILE_WEB")
+返回值 **Platform?**，当前游戏运行的平台("IOS" | "ANDROID" | "WEB" | "MOBILE_WEB")
 
 ### getSDKVersion()
 获取SDK的版本号,用字符串来表示。
@@ -400,7 +491,7 @@ var platform = FBInstant.getPlatform(); // 'IOS'
 ```
 var sdkVersion = FBInstant.getSDKVersion(); // '4.1'
 ```
-返回值 string，SDK 的版本号。
+返回值 **string**，SDK 的版本号。
 
 
 ### initializeAsync()
@@ -418,7 +509,7 @@ FBInstant.initializeAsync().then(function() {
 ```
 *  Throws INVALID_OPERATION
 
-返回值 [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)当sdk 初始化完成后会返回 promise
+返回值 [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) 当sdk 初始化完成后会返回 promise
 
 
 ### setLoadingProgress()
@@ -433,20 +524,20 @@ FBInstant.initializeAsync().then(function() {
 ```
 FBInstant.setLoadingProgress(50); // 50%的资源被加载了
 ```
-返回值 void
+返回值 **void**
 
 
 ### getSupportedAPIs()
 提供当前客户端支持的 API 函数列表。
 
-代码示例：
+代码示例：该方法必须在 FBInstant.initializeAsync() 调用之后使用
 
 ```
-//该方法必须放在 FBInstant.initializeAsync() 的回调里
+//该方法必须在 FBInstant.initializeAsync() 调用之后使用
 FBInstant.getSupportedAPIs();
 // ['getLocale', 'initializeAsync', 'player.getID', 'context.getType', ...]
 ```
-返回值  Array&lt;string> 返回客户端支持的 API 函数列表
+返回值  **Array&lt;string>** 返回客户端支持的 API 函数列表
 
 
 ### getEntryPointData()
@@ -457,10 +548,23 @@ FBInstant.getSupportedAPIs();
 代码示例：
 
 ```
-//该方法必须放在 FBInstant.initializeAsync() 的回调里
+//该方法必须在 FBInstant.initializeAsync() 调用之后使用
 const entryPointData = FBInstant.getEntryPointData();
 ```
-返回值  Object 与当前入口点相关的数据。
+返回值 **Object** 与当前入口点相关的数据。
+
+### getEntryPointAsync()
+返回与游戏启动的入口点相关的数据对象。
+
+代码示例：
+
+```
+//该方法必须在 FBInstant.initializeAsync() 调用之后使用
+FBInstant.getEntryPointAsync();
+// 'admin_message'
+```
+
+返回值： **String** 用户从哪个入口进入的游戏
 
 ### setSessionData()
 为当前环境设置游戏的数据。
@@ -474,7 +578,7 @@ const entryPointData = FBInstant.getEntryPointData();
 ```
 FBInstant.setSessionData({coinsEarned: 10, eventsSeen: ['start', ...]});
 ```
-返回值 void
+返回值 **void**
 
 ### startGameAsync()
 这表明游戏已经加载完资源，可以开始玩了。当返回 promise 的 resolve 时，环境信息将会更新。
@@ -488,7 +592,8 @@ FBInstant.startGameAsync().then(function() {
 ```
 *  Throws INVALID_PARAM
 *  Throws CLIENT_REQUIRES_UPDATE
-返回值 [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)当游戏应当开始玩的时候会返回 promise
+*  
+返回值 [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) 当游戏应当开始玩的时候会返回 promise
 
 ### shareAsync()
 这将启动一个对话框，让用户共享指定的内容，可能是一个 Messenger 里的消息，或者是用户时间线上的一个帖子。一个blob数据可以附加在分享上，当游戏通过分享启动时，可以通过 FBInstant.getEntryPointData() 方法获取。这个数据必须少于1000个字符。用户可以选择取消分享，或者关闭对话框，但不论用户是否真的分享了内容，都会返回 promise 的 resolve。
@@ -558,7 +663,7 @@ FBInstant.updateAsync({
 ```
 FBInstant.quit();
 ```
-返回值 void
+返回值 **void**
 
 ### logEvent()
 
@@ -581,7 +686,7 @@ var logged = FBInstant.logEvent(
   {custom_property: 'custom_value'},
 );
 ```
-返回值 **CodeError** 如果事件记录失败，返回错误信息，否则返回 null.
+返回值 **APIError** 如果事件记录失败，返回错误信息，否则返回 null.
 
 ### onPause()
 设置一个暂停事件触发时调用的方法。
@@ -590,4 +695,48 @@ var logged = FBInstant.logEvent(
 •	func **Function**  当暂停事件触发时调用的方法。
 
 返回值 **void**
+
+### getInterstitialAdAsync()
+尝试创建一个交互广告的实例。可以预加载和提交这个实例。
+
+**参数**
+
+•	placementID  **String**  在 Audience Network 设置的位置ID。
+
+代码示例：
+
+```
+FBInstant.getInterstitialAdAsync(
+  'my_placement_id',
+).then(function(interstitial) {
+  interstitial.getPlacementID(); // 'my_placement_id'
+});
+```
+•	Throws **ADS_TOO_MANY_INSTANCES**
+
+•	Throws **CLIENT_UNSUPPORTED_OPERATION**
+
+返回值： **Promise** 成功了返回 resolves，失败了返回 reject
+
+### getRewardedVideoAsync()
+尝试创建一个激励视频广告的实例。可以预加载和提交这个实例。
+
+**参数**
+
+•	placementID  **string**  在 Audience Network 设置的位置ID。
+
+代码示例：
+
+```
+FBInstant.getRewardedVideoAsync(
+  'my_placement_id',
+).then(function(rewardedVideo) {
+  rewardedVideo.getPlacementID(); // 'my_placement_id'
+});
+```
+•	Throws **ADS_TOO_MANY_INSTANCES**
+
+•	Throws **CLIENT_UNSUPPORTED_OPERATION**
+
+返回值： **Promise** 成功了返回 resolves，失败了返回 reject
 

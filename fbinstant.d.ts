@@ -40,11 +40,15 @@ declare class FBInstant {
     /**
      * 获取入口点数据
      */
-    static getEntryPointData(): object;
+    static getEntryPointData(): Object;
+    /**
+     * 用户从哪个入口进入的游戏
+     */
+    static getEntryPointAsync(): string;
     /**
      * 设置会话数据
      */
-    static setSessionData(sessionData: object): void;
+    static setSessionData(sessionData: Object): void;
     /**
      * 游戏已完成加载资源，用户点击了开始游戏的按钮
      * 返回一个 Promise 方法
@@ -68,11 +72,21 @@ declare class FBInstant {
      * @param valueToSum 可选，FB分析可以计算它。
      * @param parameters 可选，它可以包含多达25个 key-value，以记录事件。key 必须是2-40个字符，只能包含'_', '-', ' '和字母数字的字符。 Value 必须少于100个字符。
      */
-    static logEvent(eventName: string, valueToSum?: number, parameters?: object): void;
+    static logEvent(eventName: string, valueToSum?: number, parameters?: Object): APIError;
     /**
      * 设置一个暂停触发的方法
      */
     static onPause(func: Function): void;
+    /**
+     * 创建交互广告
+     * @param placementID 在 Audience Network 设置的位置ID
+     */
+    static getInterstitialAdAsync(placementID: String): Promise<void>;
+    /**
+     * 创建激励视频广告
+     * @param placementID 在 Audience Network 设置的位置ID
+     */
+    static getRewardedVideoAsync(placementID: String): Promise<void>;
 }
 interface FBPlayer {
     /**
@@ -106,6 +120,21 @@ interface FBPlayer {
      */
     flushDataAsync(): Promise<void>;
     /**
+     * 获取当前玩家数据
+     * @param keys 数据的 key 的数组
+     */
+    getStatsAsync(keys: string[]): Promise<void>;
+    /**
+     * 把当前用户的数据储存在FB平台上。
+     * @param data 包含key-value的数据对象.
+     */
+    setStatsAsync(stats: Object): Promise<void>;
+    /**
+     * 把当前玩家数据增量更新储存到FB平台上。
+     * @param data 包含key-value的数据对象.
+     */
+    incrementStatsAsync(increments: Object): Promise<void>;
+    /**
      * 获取玩家好友的信息
      */
     getConnectedPlayersAsync(): Promise<ConnectedPlayer[]>;
@@ -133,7 +162,7 @@ interface Context {
     /**
      * 选择游戏场景
      */
-    chooseAsync(options?: { filter: ContextFilter[], maxSize: number, minSize: number }): Promise<void>;
+    chooseAsync(options?: { filter?: ContextFilter[], maxSize?: number, minSize?: number }): Promise<void>;
     /**
      * 创建游戏场景
      */
@@ -212,7 +241,7 @@ interface SharePayload {
      * 一个附加到分享上的数据。
      * 所有从这个分享启动的游戏都可以通过  FBInstant.getEntryPointData() 方法获取到该数据。
      */
-    data: string;
+    data: Object;
 }
 /**
  * 自定义更新内容
@@ -243,7 +272,7 @@ interface CustomUpdatePayload {
      * 附加到更新上的数据。当游戏通过分享启动时，可以通过 FBInstant.getEntryPointData() 方法获取。
      * 该数据必须少于1000个字符。
      */
-    data: object;
+    data: Object;
     /**
      * 指定更新的方式。
      * 'IMMEDIATE' - 默认值，立即发布更新
@@ -254,7 +283,17 @@ interface CustomUpdatePayload {
     /**
      * 指定自定义更新的通知设置。可以是“NO_PUSH”或“PUSH”，默认为“NO_PUSH”。
      */
-    notification:string;
+    notification: string;
+}
+interface APIError {
+    /**
+     * 错误码
+     */
+    code: string;
+    /**
+     * 错误信息
+     */
+    message: string;
 }
 type ContextFilter = "NEW_CONTEXT_ONLY" | "INCLUDE_EXISTING_CHALLENGES";
 type Platform = "IOS" | "ANDROID" | "WEB" | "MOBILE_WEB";
