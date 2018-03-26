@@ -1,31 +1,8 @@
 
 
 //Copyright (c) 2014-present, Egret Technology.
-//for fbinstant.2.0.js
+//for fbinstant.4.0.js
 declare class FBInstant {
-    /**
-     * 获取用户的地域信息，例如:zh_CN en_US
-     */
-    static getLocale(): string;
-    /**
-     * 获取运行的平台信息，例如:iOS, android 和 web
-     */
-    static getPlatform(): string;
-    /**
-     * SDK 初始化结束会返回一个 Promise 方法
-     * 应当在其他 API 使用前调用
-     */
-    static initializeAsync(): Promise<void>;
-    /**
-     * 通知平台资源加载的百分比
-     * @param percentage 0-100
-     */
-    static setLoadingProgress(percentage: number): void;    
-    /**
-     * 游戏已完成加载资源，用户点击了开始游戏的按钮
-     * 返回一个 Promise 方法
-     */
-    static startGameAsync(): Promise<void>;
     /**
      * 获取用户信息
      */
@@ -35,36 +12,69 @@ declare class FBInstant {
      */
     static context: Context;
     /**
-     * SDK 的版本号，例如: '2.0'
+     * 获取用户的地域信息，例如:zh_CN en_US
      */
-    static getSDKVersion(): string;    
-    
+    static getLocale(): string;
     /**
-     * 通知 Facebook 平台当前的分数
-     * @param score 玩家在游戏里的分数
+     * 获取运行的平台信息: IOS | ANDROID | WEB | MOBILE_WEB
      */
-    static setScore(score: number): void;
+    static getPlatform(): string;
     /**
-     * 显示平台统一的游戏结束画面
-     * 当游戏重新开始的时候，返回一个 Promise 方法。
+     * SDK 的版本号，例如: '4.0'
      */
-    static endGameAsync(): Promise<void>;
+    static getSDKVersion(): string;
     /**
-     * 进行截屏，用户以后可以分享给好友。
+     * SDK 初始化结束会返回一个 Promise 方法
+     * 应当在其他 API 使用前调用
      */
-    static takeScreenshotAsync(): Promise<void>;
+    static initializeAsync(): Promise<void>;
     /**
-     * 发送分享给好友的截屏画面。
-     * @param base64picture 把截图进行 base64 编码后的字符串
+     * 通知平台资源加载的百分比
+     * @param percentage 0-100
      */
-    static sendScreenshotAsync(base64picture: string): Promise<void>;
+    static setLoadingProgress(percentage: number): void;
     /**
-     * 遇到错误中止游戏。只有当游戏进入不可恢复的状态时才可被调用。
-     * @param e 错误信息
+     * 获取平台支持的 api 列表
      */
-    static abort(e: any): void;
+    static getSupportedAPIs(): string[];
+    /**
+     * 获取入口点数据
+     */
+    static getEntryPointData(): object;
+    /**
+     * 设置会话数据
+     */
+    static setSessionData(sessionData: object): void;
+    /**
+     * 游戏已完成加载资源，用户点击了开始游戏的按钮
+     * 返回一个 Promise 方法
+     */
+    static startGameAsync(): Promise<void>;
+    /**
+     * 分享游戏
+     */
+    static shareAsync(payload: SharePayload): Promise<void>;
+    /**
+     * 通知 Facebook 在游戏中发生的更新
+     */
+    static updateAsync(payload: CustomUpdatePayload): Promise<void>;
+    /**
+     * 退出游戏
+     */
+    static quit(): void;
+    /**
+     * 使用 Facebook 的分析功能来分析应用。
+     * @param eventName 要分析的事件名称
+     * @param valueToSum 可选，FB分析可以计算它。
+     * @param parameters 可选，它可以包含多达25个 key-value，以记录事件。key 必须是2-40个字符，只能包含'_', '-', ' '和字母数字的字符。 Value 必须少于100个字符。
+     */
+    static logEvent(eventName: string, valueToSum?: number, parameters?: object): void;
+    /**
+     * 设置一个暂停触发的方法
+     */
+    static onPause(func: Function): void;
 }
-interface FBPlayer{
+interface FBPlayer {
     /**
      * 用户的唯一标识ID
      */
@@ -86,12 +96,20 @@ interface FBPlayer{
      * 把当前用户的数据储存在FB平台上。
      * @param data 包含key-value的数据对象.
      */
-    setDataAsync(data :Object): Promise<void>;
+    setDataAsync(data: Object): Promise<void>;
+    /**
+     * 立刻保存数据
+     */
+    flushDataAsync(): Promise<void>;
+    /**
+     * 获取玩家好友的信息
+     */
+    getConnectedPlayersAsync(): Promise<ConnectedPlayer[]>;
 }
 /**
  * 当前游戏的来源信息
  */
-interface Context{
+interface Context {
     /**
      * 当前游戏来源的唯一id
      */
@@ -100,4 +118,70 @@ interface Context{
      * 游戏的来源类型：'post', 'thread', 'group', or 'solo'
      */
     getType(): string;
+    /**
+     * 切换游戏场景
+     */
+    switchAsync(): Promise<void>;
+    /**
+     * 选择游戏场景
+     */
+    chooseAsync(): Promise<void>;
+    /**
+     * 创建游戏场景
+     */
+    createAsync(): Promise<void>;
+}
+/**
+ * 游戏好友的信息
+ */
+interface ConnectedPlayer {
+    /**
+     * 关联用户的ID
+     */
+    getID(): string;
+    /**
+     * 关联用户的名字
+     */
+    getName(): string;
+    /**
+     * 关联用户的头像 ulr 地址
+     */
+    getPhoto(): string;
+}
+/**
+ * 要分享的内容
+ */
+interface SharePayload {
+    /**
+     * 表示共享的目标
+     * "INVITE" | "REQUEST" | "CHALLENGE" | "SHARE"
+     */
+    intent: string;
+    /**
+     * 要分享的图像，使用 base64 编码
+     */
+    image: string;
+    /**
+     * 要分享的文字
+     */
+    text: string;
+    /**
+     * 一个附加到分享上的数据。
+     * 所有从这个分享启动的游戏都可以通过  FBInstant.getEntryPointData() 方法获取到该数据。
+     */
+    data: string;
+}
+/**
+ * 自定义更新内容
+ */
+interface CustomUpdatePayload {
+    /**
+     * 对于自定义更新来说，该值应该为 'CUSTOM'.
+     */
+    action: string;
+    /**
+     * 自定义更新使用的模板的ID，模板应该在 fbapp-config.json 中预定义。
+     * 查看配置文件说明：https://developers.facebook.com/docs/games/instant-games/bundle-config
+     */
+    template: string
 }

@@ -1,99 +1,39 @@
-#API 说明 v2.1
+#Facebook InstantGame API v4.0 说明
 
-##FBInstant
+#FBInstant
 
 Instant Games SDK 的顶级命名空间.
 
-##FBInstant.getLocale
-
-获取用户的地域信息。 例如 **zh_CN**、 **en_US**
-全部的地域信息数据，请看此链接 https://www.facebook.com/translations/FacebookLocales.xml 。
-注意，只有FBInstant.initializeAsync()获得回调以后，才能调用这个api。
-
-代码示例：
-
-```
-var locale = FBInstant.getLocale(); // 'en_US'
-```
-##FBInstant.getPlatform
-当前游戏运行在哪个平台，返回值为：'iOS', 'android' 和 'web'。
-注意，只有FBInstant.initializeAsync()获得回调以后，才能调用这个api。
-
-代码示例：
-
-```
-var platform = FBInstant.getPlatform(); // 'iOS', 'android' or 'web'
-```
-##FBInstant.getSDKVersion
-获取SDK的版本号，例如 "2.1"。
-
-代码示例：
-
-```
-var sdkVersion = FBInstant.getSDKVersion(); // '2.1'
-```
-##FBInstant.initializeAsync
-初始化SDK，应当在其他API使用前调用。
-代码示例：
-
-```
-FBInstant.initializeAsync().then(function() {
-  var locale = FBInstant.getLocale(); // 'en_US'
-  var platform = FBInstant.getPlatform(); // 'iOS', 'android' or 'web'
-  var sdkVersion = FBInstant.getSDKVersion(); // '2.0'
-  var playerID = FBInstant.player.getID();
-});
-```
-当sdk 初始化结束会返回一个 [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)
-
-##FBInstant.setLoadingProgress
-告诉平台游戏初始化资源加载的进度
-
-代码示例：
-
-```
-FBInstant.setLoadingProgress(50); // 50%的资源被加载了
-```
-**参数**
-•	percentage **number**  0到100之间的数字
-
-##FBInstant.startGameAsync
-这表明游戏已完成加载资源，用户准备好开始玩了。
-代码示例：
-
-```
-FBInstant.startGameAsync().then(function() {
-  //在这我们可以确定用户点击了开始游戏的按钮
-  myGame.start();
-});
-```
-当游戏应当开始玩的时候会返回一个 [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)
-收到这个信号说明用户已经明确的准备好玩游戏了，在此之后，游戏里不应该再有另一个“点击开始”的步骤。
-
-##FBInstant.player
+##player
 包含当前用户信息的一些方法和属性
 
-##FBInstant.player.getID
+###getID()
 玩家的唯一标识ID。一个Facebook用户的id是不会改变的。同一个Facebook的用户，在不同的游戏里会有不用的id。
-注意，只有FBInstant.initializeAsync()获得回调以后，才能调用这个api。
+注意，该方法必须放在 FBInstant.initializeAsync() 的回调里。
 
 代码示例：
 
 ```
+// 该方法必须放在 FBInstant.initializeAsync() 的回调里
 var playerID = FBInstant.player.getID();
 ```
-##FBInstant.player.getName
+返回值：**string**，用户的唯一ID
+
+###getName()
 用户的名字。
-注意，只有FBInstant.initializeAsync()获得回调以后，才能调用这个api。
+注意，该方法必须放在 FBInstant.initializeAsync() 的回调里。
 
 代码示例：
 
 ```
+//该方法必须放在 FBInstant.initializeAsync() 的回调里。
 var playerName = FBInstant.player.getName();
 ```
-##FBInstant.player.getPhoto
+返回值：**string**，用户的名字
+
+###getPhoto()
 用户头像的链接地址。头像的图片始终为正方形，尺寸最小为200x200。建议在游戏中使用的时候，先将图像缩放到所需的大小。
-注意，只有FBInstant.initializeAsync()获得回调以后，才能调用这个api。
+注意，该方法必须放在 FBInstant.initializeAsync() 的回调里。
 警告：由于跨域的问题，在 canvas 里使用图片会有问题。要防止此情况，请将图像的 cross-origin 属性设置为 "anonymous"
 
 代码示例：
@@ -103,8 +43,15 @@ var playerImage = new Image();
 playerImage.crossOrigin = 'anonymous';
 playerImage.src = FBInstant.player.getPhoto();
 ```
-##FBInstant.player.getDataAsync
-取回在FB平台储存的当前用户的数据
+返回值：string，用户的头像的链接地址
+
+
+###getDataAsync()
+取回当前用户在FB平台储存的数据
+
+**参数**
+•	keys  **Array &lt;String>**  一个用来检索数据的key的数组
+
 代码示例：
 
 ```
@@ -116,12 +63,14 @@ FBInstant.player
      var currentLife = data['currentLife'];
 });
 ```
-**参数**
-•	keys  **Array &lt;String>**  要获取的数据的key值
 返回值 [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) &lt;Object> 如果发送的Key存在，则通过Promise 返回储存的数据对象.
 
-##FBInstant.player.setDataAsync
-把当前用户的数据储存在FB平台上。
+###setDataAsync()
+把当前用户的数据储存在FB平台上。每个用户可以储存1MB的数据。
+代码示例：
+**参数**
+•	data  **Object**  需要储存的数据，包含key-value的数据对象。对象只能包含可以序列号的值，任何不可序列化的值都会导致储存失败。
+
 代码示例：
 
 ```
@@ -131,102 +80,388 @@ FBInstant.player
     currentLife: 300,
   })
   .then(function() {
-    console.log('data is saved');
+    console.log('data is set');
 });
 ```
-**参数**
-•	data  **Object**  包含key-value的数据对象.
-返回值 [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) 数据储存成功会返回一个promise
 
-##FBInstant.context
-当前游戏的来源信息
+返回值 [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) 当数据提交了以后会返回一个 promise。 注意：这个promise 并不意味着这个数据已经被成功保存。它只是验证了数据的有效性，并且随后会被保存。可以保证的是，在调用 player.getDataAsync 方法时，这些设定的数据会生效。
 
-##FBInstant.context.getID
-当前游戏来源的唯一id。例如你的信息流中有很多好友都发了这个游戏，通过这个id来知道你玩的是哪一个。注意，必须在FBInstant.startGameAsync的回调后才能得到这个id。在FBInstant.endGameAsync的回调后可能会更新这个id。如果平台不支持，或者是在独立页面玩的游戏，这个id值为null
+
+###flushDataAsync()
+将用户的数据立刻更新到云存储。这个方法是昂贵的，应该主要用于持久性需要立即被游戏所知的关键数据的更改。非关键的更改应该依赖于平台来将它们储存到后台。注意: 当该方法未完成时，再调用player.setDataAsync 这个方法会被拒绝.
 
 代码示例：
 
 ```
+FBInstant.player
+  .setDataAsync({
+    achievements: ['medal1', 'medal2', 'medal3'],
+    currentLife: 300,
+  })
+  .then(FBInstant.player.flushDataAsync)
+  .then(function() {
+    console.log('Data persisted to FB!');
+});
+```
+
+返回值 [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) 数据储存成功会返回一个promise，如果保存失败则返回拒绝
+
+###getConnectedPlayersAsync()
+获取和当前玩家有关联的玩家列表信息（即好友列表）。
+
+代码示例：
+
+```
+var connectedPlayers = FBInstant.player.getConnectedPlayersAsync()
+  .then(function(players) {
+    console.log(players.map(function(player) {
+      return {
+        id: player.getID(),
+        name: player.getName(),
+      }
+    }));
+  });
+// [{id: '123456789', name: 'Paul Atreides'}, {id: '987654321', name: 'Duncan Idaho'}]
+
+```
+返回值 [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) &lt;Object&lt;ConnectedPlayer>返回一个promise，包含了关联用户对象的数据
+
+##context
+包含当前游戏环境的一些方法和属性
+
+###getID()
+当前游戏来源的唯一id。它代表了当前游戏是在哪玩的（例如：是在 messenger 的对话里还是 facebook 的网页里）。如果是在独立页面玩的游戏，这个id值为 null。只有在 FBInstant.startGameAsync 方法被调用后，这个结果才能保证是正确的。
+
+代码示例：
+
+```
+//该方法必须放在 FBInstant.startGameAsync() 的回调里。
 var contextID = FBInstant.context.getID();
 ```
+返回值 string，当前游戏环境的id。
 
-##FBInstant.context.getType
-通过该方法可以获知用户是在哪玩的这个游戏。比如 'post', 'thread', 'group', or 'solo'.
+###getType()
+当前游戏的环境类型。
 
 代码示例：
+
 ```
+//该方法必须放在 FBInstant.startGameAsync() 的回调里。
 var contextType = FBInstant.context.getType();
 ```
+返回值 ("POST" | "THREAD" | "GROUP" | "SOLO") 当前游戏环境的类型。
 
-##FBInstant.setScore
+###switchAsync()
+请求切换到指定的游戏环境。如果玩家没有进入该环境的权限，或者玩家没有允许切换到该环境，该方法都会被拒绝。如果成功切换到指定游戏环境，将会返回一个 promise.
 
-向平台上传分数。每当玩家的分数在游戏中改变时，就可以调用这个方法，这样平台可以在游戏外实时更新这些分数，提升用户体验。当调用 endGameAsync 时，通过这个API发送的分数将显示在排行榜上。
-
-代码示例：
-
-```
-FBInstant.setScore(42);
-```
-**参数**
-•	score **number**  玩家在游戏里的分数
-
-##FBInstant.endGameAsync
-显示平台统一的游戏结束画面。
-
-代码示例：
-
-```
-FBInstant.endGameAsync().then(function() {
-  // 在这里我们可以确定，玩家点击了重玩的按钮
-  myGame.resetScore();
-  myGame.restartWithoutTutorial();
-});
-```
-当游戏重新开始的时候，返回一个 [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)。
-
-
-##FBInstant.takeScreenshotAsync
-进行截屏，用户以后可以分享给好友。
-
-代码示例：
-```
-myGame.displayFinalScore();
-FBInstant.takeScreenshotAsync().then(function() {
-  console.log('Screenshot taken!');
-}).catch(function() {
-  console.log('Failed to take screenshot.');
-});
-```
-截屏成功或者失败，都会返回一个 [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)。
-
-##FBInstant.sendScreenshotAsync
-用户要分享的截屏画面。截屏尺寸应该和游戏场景的尺寸一致。
-
-
-代码示例：
-```
-var scoreCanvas = new HtmlCanvasElement();
-var base64Picture = scoreCanvas.toDataURL();
-FBInstant.sendScreenshotAsync(base64Picture).then(function() {
-  console.log('Screenshot sent!');
-}).catch(function(error) {
-  console.log('Failed to send screenshot.');
-  console.log(error.toString());
-});
-```
 **参数**
 
-•	base64picture **string** 把截图进行 base64 编码后的字符串
-发送成功或者失败，都会返回一个 [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)。
-
-##FBInstant.abort
-
-遇到错误中止游戏。只有当游戏进入不可恢复的状态时才可被调用。
+•	id **string**  想要进入的环境ID
 
 代码示例：
+
 ```
-FBInstant.abort(e);
+console.log(FBInstant.context.getID());
+// 1122334455
+FBInstant.context
+  .switchAsync('1234567890')
+  .then(function() {
+    console.log(FBInstant.context.getID());
+    // 1234567890
+  });
 ```
+返回值 [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) 当游戏切换到指定环境，返回一个 promise，失败会被拒绝。
+
+###chooseAsync()
+为玩家打开一个游戏环境选择列表。如果玩家选择了一个可用的环境，客户端将尝试切到那个环境，如果成功，返回 resolve。如果王佳退出菜单，或者客户端未能切换到新环境，返回 reject.
+请求切换到指定的游戏环境。如果玩家没有进入该环境的权限，或者玩家没有允许切换到该环境，该方法都会被拒绝。如果成功切换到指定游戏环境，将会返回一个 promise.
+
 **参数**
 
-•	e [Error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error) 具体的错误信息。
+•	options **Object**  提供可选择的环境对象。
+
+•	options.filters **Array**<ContextFilter>设置一组应用于环境对象的过滤器.
+
+•	options.maxSize **number** 理想情况下，环境对象的最大值
+
+•	options.minSize **number** 理想情况下，环境对象的最小值
+
+代码示例：
+
+```
+console.log(FBInstant.context.getID());
+// 1122334455
+FBInstant.context
+  .chooseAsync()
+  .then(function() {
+    console.log(FBInstant.context.getID());
+    // 1234567890
+  });
+```
+
+```
+console.log(FBInstant.context.getID());
+// 1122334455
+FBInstant.context
+  .chooseAsync({
+    filters: ['NEW_CONTEXT_ONLY'],
+    minSize: 3,
+  })
+  .then(function() {
+    console.log(FBInstant.context.getID());
+    // 1234567890
+  });
+```
+返回值 [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) 当游戏切换到指定环境，返回一个 promise，失败会返回reject(例如，用户取消了对话框)
+
+###createAsync()
+在当前玩家和指定玩家之间，尝试创建或切换一个环境。如果指定玩家不能玩这个游戏，或者玩家决绝进入新环境，则返回 promise 的 recject。如果成功切换到新游戏的环境时，则返回 promise 的 resolve。
+
+**参数**
+
+•	playerID **string**  用户的 ID
+
+代码示例：
+
+```
+console.log(FBInstant.context.getID());
+// 1122334455
+FBInstant.context
+  .createAsync('12345678')
+  .then(function() {
+    console.log(FBInstant.context.getID());
+    // 5544332211
+  });
+```
+返回值 [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) 当游戏成功切换到指定环境，返回一个 promise 的 resolve，失败会返回reject
+
+
+##getLocale()
+
+获取用户的地域信息。 例如 **zh_CN**、 **en_US**
+全部的地域信息数据，请看此链接 https://www.facebook.com/translations/FacebookLocales.xml 。
+该方法必须放在 FBInstant.initializeAsync() 的回调里
+
+代码示例：
+
+```
+// 该方法必须放在 FBInstant.initializeAsync() 的回调里
+var locale = FBInstant.getLocale(); // 'en_US'
+```
+返回值 string，当前地域信息。
+
+##getPlatform()
+当前游戏运行在哪个平台。该方法必须放在 FBInstant.initializeAsync() 的回调里
+
+代码示例：
+
+```
+该方法必须放在 FBInstant.initializeAsync() 的回调里
+var platform = FBInstant.getPlatform(); // 'IOS'
+```
+返回值 string，当前游戏运行的平台("IOS" | "ANDROID" | "WEB" | "MOBILE_WEB")
+
+##getSDKVersion()
+获取SDK的版本号,用字符串来表示。
+
+代码示例：
+
+```
+var sdkVersion = FBInstant.getSDKVersion(); // '4.0'
+```
+返回值 string，SDK 的版本号。
+
+
+##initializeAsync()
+初始化SDK，应当在任何其他的API使用前调用。
+代码示例：
+
+```
+FBInstant.initializeAsync().then(function() {
+  // 在初始化完成之前，下面这些属性都是无法得到的。必须要放在这个回调方法里。
+  var locale = FBInstant.getLocale(); // 'en_US'
+  var platform = FBInstant.getPlatform(); // 'IOS'
+  var sdkVersion = FBInstant.getSDKVersion(); // '4.0'
+  var playerID = FBInstant.player.getID();
+});
+```
+返回值 [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)当sdk 初始化完成后会返回 promise
+
+
+##setLoadingProgress()
+告诉平台游戏初始化资源加载的进度
+
+**参数**
+
+•	percentage **number**  0到100之间的数字
+
+代码示例：
+
+```
+FBInstant.setLoadingProgress(50); // 50%的资源被加载了
+```
+
+
+##getSupportedAPIs()
+提供当前客户端支持的 API 函数列表。
+
+代码示例：
+
+```
+//该方法必须放在 FBInstant.initializeAsync() 的回调里
+FBInstant.getSupportedAPIs();
+// ['getLocale', 'initializeAsync', 'player.getID', 'context.getType', ...]
+```
+返回值  Array&lt;string> 返回客户端支持的 API 函数列表
+
+
+##getEntryPointData()
+返回与游戏启动的入口点相关的数据对象。
+
+对象的内容是开发人员定义的，并且可以在不同平台的入口点触发。在老的移动客户端上会返回 null。如果特定的入口点没有数据时，也会返回 null。
+
+代码示例：
+
+```
+//该方法必须放在 FBInstant.initializeAsync() 的回调里
+const entryPointData = FBInstant.getEntryPointData();
+```
+返回值  Object 与当前入口点相关的数据。
+
+##setSessionData()
+为当前环境设置游戏的数据。
+每当游戏想要更新当前会话的数据时，可以调用该方法。本次会话的数据可以用于填充多种有效载荷，如游戏webhooks
+
+**参数**
+
+•	sessionData **Object**  一个任意的数据对象，必须小于1000个字符
+
+代码示例：
+
+```
+FBInstant.setSessionData({coinsEarned: 10, eventsSeen: ['start', ...]});
+```
+返回值 void
+
+##startGameAsync()
+这表明游戏已经加载完资源，可以开始玩了。当返回 promise 的 resolve 时，环境信息将会更新。
+
+代码示例：
+
+```
+FBInstant.startGameAsync().then(function() {
+  //在这我们可以确定用户点击了开始游戏的按钮
+  myGame.start();
+});
+```
+返回值 [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)当游戏应当开始玩的时候会返回 promise
+
+##shareAsync()
+这将启动一个对话框，让用户共享指定的内容，可能是一个 Messenger 里的消息，或者是用户时间线上的一个帖子。一个blob数据可以附加在分享上，当游戏通过分享启动时，可以通过 FBInstant.getEntryPointData() 方法获取。这个数据必须少于1000个字符。用户可以选择取消分享，或者关闭对话框，但不论用户是否真的分享了内容，都会返回 promise 的 resolve。
+
+**参数**
+
+•	payload **SharePayload**  要分享的内容，请看示例代码
+
+代码示例：
+
+```
+FBInstant.shareAsync({
+  intent: 'REQUEST',
+  image: base64Picture,
+  text: 'X is asking for your help!',
+  data: { myReplayData: '...' },
+}).then(function() {
+  // 继续游戏
+});
+```
+返回值 [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) 不管分享成功或失败，都会返回 promise 的 resolve
+
+##updateAsync()
+通知Facebook在游戏中发生的更新。这将暂时把控制权交给Facebook，而Facebook将决定根据更新的内容来做什么。当Facebook将控制权归还给游戏时，将返回 promise 的 resolve/reject.
+
+**参数**
+
+•	payload **CustomUpdatePayload **  要更新的内容
+
+代码示例：
+
+```
+//这将发送一个自定义更新。如果游戏是运行在一个 messenger 的对话里，
+//它将发送一条带有图文的消息到指定的对话里。
+//如果其他用户通过这条消息启动了游戏，
+//这些游戏会话将可以通过 FBInstant.getEntryPointData() 
+//方法获取附加的 blob 数据。
+
+FBInstant.updateAsync({
+  action: 'CUSTOM',
+  cta: 'Join The Fight',
+  template:'join_fight',
+  image: base64Picture,
+  text: 'X just invaded Y\'s village!',
+  data: { myReplayData: '...' },
+  strategy: 'IMMEDIATE',
+  notification: 'NO_PUSH',
+}).then(function() {
+  // closes the game after the update is posted.
+  FBInstant.quit();
+});
+```
+返回值 [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) 当Facebook将控制权归还给游戏时返回 promise
+
+## quit()
+退出游戏
+
+代码示例：
+
+```
+FBInstant.quit();
+```
+返回值 void
+
+##logEvent()
+
+使用 Facebook 来分析一个 app，更多细节请参见： https://developers.facebook.com/docs/javascript/reference/v2.8#app_events 
+
+**参数**
+
+•	eventName **string**  事件的名称。必须是2到40个字符，只能包含'_', '-', ' '和字母数字的字符。
+
+•	valueToSum **number** 一个可选的数字，FB分析可以计算它。
+
+•	parameters **Object** 一个可选的对象，它可以包含多达25个 key-value，以记录事件。key 必须是2-40个字符，只能包含'_', '-', ' '和字母数字的字符。 Value 必须少于100个字符。
+ 
+代码示例：
+
+```
+var logged = FBInstant.logEvent(
+  'my_custom_event',
+  42,
+  {custom_property: 'custom_value'},
+);
+```
+返回值 **CodeError** 如果事件记录失败，返回错误信息，否则返回 null.
+
+##onPause()
+设置一个暂停事件触发时调用的回调方法。
+**参数**
+
+•	func **Function**  当暂停事件触发时调用的方法。
+
+返回值 **void**
+
+##ConnectedPlayer
+表示与当前玩家有关联的其他玩家的信息。
+
+### getID()
+得到关联玩家的ID
+返回值 **string** 关联玩家的ID
+
+### getName()
+得到关联玩家的名字
+返回值 **string** 关联玩家的名字
+
+### getPhoto()
+得到关联玩家的公开头像
+返回值 **string** 关联玩家的公开头像的 url
+
