@@ -1,4 +1,4 @@
-# Facebook InstantGame API v6.0 说明
+# Facebook InstantGame API v6.1 说明
 
 # FBInstant
 
@@ -41,13 +41,46 @@ FBInstant.player.getSignedPlayerInfoAsync('my_metadata')
       100);
   });
 ```
-•	Throws **INVALID_PARAM**
+•	抛出 **INVALID_PARAM**
 
-•	Throws **NETWORK_FAILURE**
+•	抛出 **NETWORK_FAILURE**
 
-•	Throws **CLIENT_REQUIRES_UPDATE**
+•	抛出 **CLIENT_REQUIRES_UPDATE**
 
 返回值： **Promise&lt;SignedPlayerInfo>** 一个带有 signedplayerinfo 对象的 [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise).
+
+### canSubscribeBotAsync()
+返回一个 promise，表示玩家是否可以与游戏机器人对战。
+
+代码示例：
+
+```
+// 该方法必须在 FBInstant.player.subscribeBotAsync() 之前调用
+FBInstant.player.canSubscribeBotAsync().then(
+  can_subscribe => console.log(can_subscribe)
+);
+```
+返回值： **Promise&lt;boolean>** 玩家是否可以与机器人对战。开发者必须在检测 canSubscribeBotAsync() 之后再调用 subscribeBotAsync()。玩家在游戏中只会看到一次订阅机器人的对话框。
+
+### subscribeBotAsync()
+请求玩家订阅游戏机器人。如果失败，API 将返回 reject,如果成功，玩家将订阅游戏机器人。
+
+代码示例：
+
+```
+FBInstant.player.subscribeBotAsync().then(
+  // Player is subscribed to the bot
+).catch(function (e) {
+  // Handle subscription failure
+});
+```
+•	抛出 **INVALID_PARAM**
+
+•	抛出 **PENDING_REQUEST**
+
+•	抛出 **CLIENT_REQUIRES_UPDATE**
+
+返回值： **Promise** 如果玩家成功订阅游戏机器人，将返回 resolve；如果失败或玩家选择不订阅，将返回 reject.
 
 ### getName()
 用户在Facebook上的的名字，使用用户的语言种类显示。
@@ -75,7 +108,7 @@ var playerImage = new Image();
 playerImage.crossOrigin = 'anonymous';
 playerImage.src = FBInstant.player.getPhoto();
 ```
-返回值：string，用户的头像的链接地址
+返回值：**string**，用户的头像的链接地址
 
 
 ### getDataAsync()
@@ -171,11 +204,9 @@ FBInstant.player
     var zombiesSlain = stats['zombiesSlain'];
   });
 ```
-•	Throws **INVALID_PARAM**
-
-•	Throws **NETWORK_FAILURE**
-
-•	Throws **CLIENT_UNSUPPORTED_OPERATION**
+*  Throws **INVALID_PARAM**
+*  Throws **NETWORK_FAILURE**
+*  Throws **CLIENT_UNSUPPORTED_OPERATION**
 
 返回值： **Promise&lt;Object>** 输入的数组作为键值的对象.
 
@@ -198,13 +229,10 @@ FBInstant.player
     console.log('data is set');
   });
 ```
-•	Throws **INVALID_PARAM**
-
-•	Throws **NETWORK_FAILURE**
-
-•	Throws **PENDING_REQUEST**
-
-•	Throws **CLIENT_UNSUPPORTED_OPERATION**
+*  Throws **INVALID_PARAM**
+*  Throws **NETWORK_FAILURE**
+*  Throws **PENDING_REQUEST**
+*  Throws **CLIENT_UNSUPPORTED_OPERATION**
 
 返回值： **Promise** 当数据提交了以后会返回一个 promise。 注意：这个promise 并不意味着这个数据已经被成功保存。它只是验证了数据的有效性，并且随后会被保存。可以保证的是，在调用 player.getStatsAsync 方法时，这些设定的数据会生效。
 
@@ -230,13 +258,10 @@ FBInstant.player
     var zombiesSlain = stats['zombiesSlain'];
   });
 ```
-•	Throws **INVALID_PARAM**
-
-•	Throws **NETWORK_FAILURE**
-
-•	Throws **PENDING_REQUEST**
-
-•	Throws **CLIENT_UNSUPPORTED_OPERATION**
+*  Throws **INVALID_PARAM**
+*  Throws **NETWORK_FAILURE**
+*  Throws **PENDING_REQUEST**
+*  Throws **CLIENT_UNSUPPORTED_OPERATION**
 
 返回值： **Promise** 当数据提交了以后会返回一个 promise。 注意：这个promise 并不意味着这个数据已经被成功保存。它只是验证了数据的有效性，并且随后会被保存。可以保证的是，在调用 player.getStatsAsync 方法时，这些设定的数据会生效。
 
@@ -275,7 +300,7 @@ var connectedPlayers = FBInstant.player.getConnectedPlayersAsync()
 //该方法必须放在 FBInstant.startGameAsync() 的回调里。
 var contextID = FBInstant.context.getID();
 ```
-返回值 string，当前游戏环境的id。
+返回值 **string**，当前游戏环境的id。
 
 ### getType()
 当前游戏的环境类型。
@@ -458,6 +483,117 @@ var contextPlayers = FBInstant.context.getPlayersAsync()
 
 返回 **[Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) &lt;Array&lt;ContextPlayer>>**
 
+
+## payments
+【内测】包含与支付和购买游戏产品相关的功能和属性。
+
+### getCatalogAsync()
+获取游戏的产品目录。
+
+代码示例：
+
+```
+FBInstant.payments.getCatalogAsync().then(function (catalog) {
+  console.log(catalog); // [{productID: '12345', ...}, ...]
+});
+```
+
+*  Throws CLIENT_UNSUPPORTED_OPERATION
+*  Throws PAYMENTS_NOT_INITIALIZED
+*  Throws NETWORK_FAILURE
+
+返回值 **Promise**，注册到游戏的一组产品
+
+### purchaseAsync()
+开始特定产品的购买流程。 如果在FBInstant.startGameAsync()解析之前调用，将返回 reject。
+
+**参数**
+
+•	playerID **purchaseConfig**  购买的配置文件
+
+代码示例：
+
+```
+FBInstant.payments.purchaseAsync({
+  productID: '12345',
+  developerPayload: 'foobar',
+}).then(function (purchase) {
+  console.log(purchase);
+  // {productID: '12345', purchaseToken: '54321', developerPayload: 'foobar', ...}
+});
+```
+
+*  Throws CLIENT_UNSUPPORTED_OPERATION
+*  Throws PAYMENTS_NOT_INITIALIZED
+*  Throws INVALID_PARAM
+*  Throws NETWORK_FAILURE
+*  Throws INVALID_OPERATION
+
+
+返回值 **Promise**，当玩家成功购买产品时返回 resolve。 失败返回 reject。
+
+### getPurchasesAsync()
+获取玩家未消费的所有购买商品。最佳做法是，游戏在客户端表明已准备好执行支付相关操作时，立即获取当前玩家的购买商品。游戏 随后可处理和消费正在等待被消费的任何购买商品。
+
+代码示例：
+
+```
+FBInstant.payments.getPurchasesAsync().then(function (purchases) {
+  console.log(purchase);
+  // [{productID: '12345', ...}, ...]
+});
+```
+
+*  Throws CLIENT_UNSUPPORTED_OPERATION
+*  Throws PAYMENTS_NOT_INITIALIZED
+*  Throws NETWORK_FAILURE
+
+返回值 **Promise**，玩家为游戏购买的一组商品。
+
+
+### consumePurchaseAsync()
+
+消费当前玩家拥有的特定购买商品。在为玩家配置商品效果之前，游戏应先请求消费已购买的商品。购买的商品成功消费后，游戏应立即向玩家呈现购买商品的效果。
+
+**参数**
+
+•	purchaseToken **string**  要使用的购买商品的购买口令。
+
+代码示例：
+
+```
+FBInstant.payments.consumePurchaseAsync('54321').then(function () {
+  // Purchase successfully consumed!
+  // Game should now provision the product to the player
+});
+```
+
+*  Throws CLIENT_UNSUPPORTED_OPERATION
+*  Throws PAYMENTS_NOT_INITIALIZED
+*  Throws INVALID_PARAM
+*  Throws NETWORK_FAILURE
+
+返回值 **Promise**，此 promise 在成功消费已购买的商品时被解析。
+
+
+### onReady()
+
+设置一个回调，在支付操作可进行时触发。
+
+**参数**
+
+•	callback **Function**  当支付可进行时执行的回调函数。
+
+代码示例：
+
+```
+FBInstant.payments.onReady(function () {
+  console.log('Payments Ready!')
+});
+```
+
+返回值 **void**
+
 ### getLocale()
 
 获取用户的语言设置。 例如 **zh_CN**、 **en_US**
@@ -614,11 +750,11 @@ FBInstant.shareAsync({
   // 继续游戏
 });
 ```
-*  Throws INVALID_PARAM
-*  Throws NETWORK_FAILURE
-*  Throws PENDING_REQUEST
-*  Throws CLIENT_REQUIRES_UPDATE
-*  Throws INVALID_OPERATION
+*  抛出 INVALID_PARAM
+*  抛出 NETWORK_FAILURE
+*  抛出 PENDING_REQUEST
+*  抛出 CLIENT_REQUIRES_UPDATE
+*  抛出 INVALID_OPERATION
 
 返回值 [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) 不管分享成功或失败，都会返回 promise 的 resolve
 
@@ -660,9 +796,9 @@ FBInstant.updateAsync({
   FBInstant.quit();
 });
 ```
-* Throws INVALID_PARAM
-* Throws PENDING_REQUEST
-* Throws INVALID_OPERATION
+* 抛出 INVALID_PARAM
+* 抛出 PENDING_REQUEST
+* 抛出 INVALID_OPERATION
 
 返回值 [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) 当Facebook将控制权归还给游戏时返回 promise
 
@@ -688,6 +824,58 @@ FBInstant.switchGameAsync('12345678').catch(function (e) {
 * 抛出 CLIENT_REQUIRES_UPDATE
 
 返回值 [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) 当Facebook将控制权归还给游戏时返回 promise
+
+### canCreateShortcutAsync()
+用户是否有资格创建快捷方式。
+如果 createShortcutAsync 已经被调用了或者用户没有资格创建快捷方式，返回 false.
+
+代码示例：
+
+```
+FBInstant.canCreateShortcutAsync()
+  .then(function(canCreateShortcut) {
+    if (canCreateShortcut) {
+      FBInstant.createShortcutAsync()
+        .then(function() {
+          // Shortcut created
+        })
+        .catch(function() {
+          // Shortcut not created
+        });
+    }
+  });
+```
+* 抛出 PENDING_REQUEST
+* 抛出 CLIENT_REQUIRES_UPDATE
+* 抛出 INVALID_OPERATION
+
+返回值 [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) 如果游戏允许玩家创建快捷方式，返回 true，否则返回 false
+
+### createShortcutAsync()
+如果用户有资格，提示用户创建游戏的快捷方式。每次会话只能调用一次。
+
+代码示例：
+
+```
+FBInstant.canCreateShortcutAsync()
+  .then(function(canCreateShortcut) {
+    if (canCreateShortcut) {
+      FBInstant.createShortcutAsync()
+        .then(function() {
+          // Shortcut created
+        })
+        .catch(function() {
+          // Shortcut not created
+        });
+    }
+  });
+```
+* 抛出 USER_INPUT
+* 抛出 PENDING_REQUEST
+* 抛出 CLIENT_REQUIRES_UPDATE
+* 抛出 INVALID_OPERATION
+
+返回值 [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) 
 
 ### quit()
 退出游戏
@@ -753,9 +941,8 @@ FBInstant.getInterstitialAdAsync(
   interstitial.getPlacementID(); // 'my_placement_id'
 });
 ```
-•	Throws **ADS_TOO_MANY_INSTANCES**
-
-•	Throws **CLIENT_UNSUPPORTED_OPERATION**
+*	抛出 **ADS_TOO_MANY_INSTANCES**
+*	抛出 **CLIENT_UNSUPPORTED_OPERATION**
 
 返回值： **Promise** 成功了返回 resolves，失败了返回 reject
 
@@ -775,9 +962,95 @@ FBInstant.getRewardedVideoAsync(
   rewardedVideo.getPlacementID(); // 'my_placement_id'
 });
 ```
-•	Throws **ADS_TOO_MANY_INSTANCES**
-
-•	Throws **CLIENT_UNSUPPORTED_OPERATION**
+*	抛出 **ADS_TOO_MANY_INSTANCES**
+*	抛出 **CLIENT_UNSUPPORTED_OPERATION**
 
 返回值： **Promise** 成功了返回 resolves，失败了返回 reject
 
+### matchPlayerAsync()
+[封闭公测] 尝试将当前玩家与等待他人加入游戏的其他玩家进行匹配。如果匹配成功，将为匹配的玩家创建一个新的 Messenger 群聊，且玩家的游戏环境将切换到该群聊。
+
+**参数**
+
+*	matchTag  **string**  玩家的可选额外信息，可用于将玩家 加到具有相似玩家的群聊中。具有完全相同标签的玩家才会加入同一群聊。标签只能包含字母、数字和下划线，且长度不能超过 100 个字符。
+*	switchContextWhenMatched **boolean** 可选的额外参数， 指定当找到匹配时，是否将玩家立即切换到新环境。默认设置为 false，亦即玩家在匹配成功后，需要明确点击玩游戏按钮才会切换到新环境。
+
+代码示例：
+
+```
+FBInstant
+  .matchPlayerAsync('level1')
+  .then(function() {
+    console.log(FBInstant.context.getID());
+    // 12345
+  });
+```
+```
+FBInstant
+  .matchPlayerAsync()
+  .then(function() {
+    console.log(FBInstant.context.getID());
+    // 3456
+  });
+```
+```
+FBInstant
+  .matchPlayerAsync(null, true)
+  .then(function() {
+    console.log(FBInstant.context.getID());
+    // 3456
+  });
+```
+*	抛出 **INVALID_PARAM**
+*	抛出 **NETWORK_FAILURE**
+*  抛出 **USER_INPUT**
+*	抛出 **PENDING_REQUEST**
+*  抛出 **CLIENT_UNSUPPORTED_OPERATION**
+*	抛出 **INVALID_OPERATION**
+
+返回值： **Promise** 当玩家已加入群聊并切换到 群聊环境时，此 promise 被解析。
+
+### checkCanPlayerMatchAsync()
+[封闭公测] 检查当前玩家是否符合 matchPlayerAsync API 的条件。
+
+
+代码示例：
+
+```
+FBInstant
+  .checkCanPlayerMatchAsync()
+  .then(canMatch => {
+    if (canMatch) {
+      FBInstant.matchPlayerAsync('level1');
+    }
+  });
+```
+
+*	抛出 **NETWORK_FAILURE**
+*  抛出 **CLIENT_UNSUPPORTED_OPERATION**
+
+
+返回值： **Promise** 当玩家符合与其他玩家匹配的条件时， 此 promise 被解析为 true，否则解析为 false。
+
+### getLeaderboardAsync()
+获取这款小游戏中的特有排行榜。
+
+**参数**
+
+•	name  **string**  小游戏的每个排行榜必须具有唯一的名称
+
+**代码示例**
+```
+FBInstant.getLeaderboardAsync('my_awesome_leaderboard')
+  .then(leaderboard => {
+    console.log(leaderboard.getName()); // 'my_awesome_leaderboard'
+  });
+```
+
+*	抛出 **LEADERBOARD_NOT_FOUND**
+*	抛出 **NETWORK_FAILURE**
+*	抛出 **CLIENT_UNSUPPORTED_OPERATION**
+*	抛出 **INVALID_OPERATION**
+*	抛出 **INVALID_PARAM**
+
+返回值： **Promise** 此 promise 在获得匹配的排行榜时被解析， 在未找到匹配时被拒绝。
