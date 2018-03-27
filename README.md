@@ -5,7 +5,7 @@
 Instant Games SDK 的顶级命名空间.
 
 ## player
-包含当前用户信息的一些方法和属性
+包含与当前玩家相关的功能和属性
 
 ### getID()
 玩家的唯一标识ID。一个Facebook用户的id是不会改变的。同一个Facebook的用户，在不同的游戏里会有不用的id。
@@ -20,7 +20,7 @@ var playerID = FBInstant.player.getID();
 返回值：**string**，用户的唯一ID
 
 ### getSignedPlayerInfoAsync( )
-获取玩家的唯一ID和一个签名，签名用来验证该 ID 来自 Facebook ，没有被篡改。该方法必须在 FBInstant.initializeAsync() 调用之后使用
+获取玩家的唯一ID和签名，签名用来验证该 ID 来自 Facebook ，并且没有被篡改。该方法必须在 FBInstant.initializeAsync() 调用之后使用
 
 **参数**
 
@@ -50,7 +50,7 @@ FBInstant.player.getSignedPlayerInfoAsync('my_metadata')
 返回值： **Promise&lt;SignedPlayerInfo>** 一个带有 signedplayerinfo 对象的 [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise).
 
 ### getName()
-用户的名字。
+用户在Facebook上的的名字，使用用户的语言种类显示。
 注意，该方法必须在 FBInstant.initializeAsync() 调用之后使用
 
 代码示例：
@@ -131,7 +131,7 @@ FBInstant.player
 
 
 ### flushDataAsync()
-将用户的数据立刻更新到云存储。这个方法是开销很大，应该主要用于关键的更改。非关键的更改应该依赖于平台来将它们储存到后台。注意: 当该方法未完成时，调用 player.setDataAsync 这个方法会被拒绝.
+将用户的数据立刻更新到云存储。这个方法的调用成本较高，应该主要用于关键的更改。非关键的更改应该依赖于平台来将它们储存到后台。注意: 当该方法未完成时，调用 player.setDataAsync 这个方法会被拒绝.
 
 代码示例：
 
@@ -436,7 +436,7 @@ FBInstant.context
 返回值 [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) 当游戏成功切换到指定环境，返回一个 promise 的 resolve，失败会返回reject
 
 ### getPlayersAsync()
-获取当前环境中正在玩游戏的玩家列表，它可能包含当前玩家的信息。
+获取当前环境中正在玩游戏的玩家列表(在过去 90 天内玩过游戏的用户)，它可能包含当前玩家的信息。
 
 代码示例：
 
@@ -460,7 +460,7 @@ var contextPlayers = FBInstant.context.getPlayersAsync()
 
 ### getLocale()
 
-获取用户的地域信息。 例如 **zh_CN**、 **en_US**
+获取用户的语言设置。 例如 **zh_CN**、 **en_US**
 全部的地域信息数据，请看此链接 https://www.facebook.com/translations/FacebookLocales.xml 。使用这个值用来确定游戏中应该显示那种语言。
 该方法必须在 FBInstant.initializeAsync() 调用之后使用
 
@@ -642,7 +642,16 @@ FBInstant.updateAsync({
   cta: 'Join The Fight',
   template:'join_fight',
   image: base64Picture,
-  text: 'X just invaded Y\'s village!',
+  text: {
+    default: 'X just invaded Y\'s village!',
+    localizations: {
+      ar_AR: 'X \u0641\u0642\u0637 \u063A\u0632\u062A ' +
+      '\u0642\u0631\u064A\u0629 Y!',
+      en_US: 'X just invaded Y\'s village!',
+      es_LA: '\u00A1X acaba de invadir el pueblo de Y!',
+    }
+  },
+  template: 'VILLAGE_INVASION',
   data: { myReplayData: '...' },
   strategy: 'IMMEDIATE',
   notification: 'NO_PUSH',
@@ -651,8 +660,33 @@ FBInstant.updateAsync({
   FBInstant.quit();
 });
 ```
-** Throws INVALID_PARAM
-** Throws PENDING_REQUEST
+* Throws INVALID_PARAM
+* Throws PENDING_REQUEST
+* Throws INVALID_OPERATION
+
+返回值 [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) 当Facebook将控制权归还给游戏时返回 promise
+
+### switchGameAsync()
+请求客户端切换到另一个小游戏。切换 失败时，API 将拒绝；成功时，客户端将加载 新游戏。
+
+**参数**
+
+•	appID **string **  要切换到的小游戏相应的应用编号。 应用必须为小游戏，且必须和当前游戏 属于同一商家所有。要将不同游戏关联到相同商家， 您可使用商务管理平台：https://developers.facebook.com/docs/apps/business-manager#update-business
+
+•	data **string** 可选的附加数据。会被设置为要切换到的游戏的入口点数据。转变为字符串时，必须小于或等于 1000 个字符。
+
+代码示例：
+
+```
+FBInstant.switchGameAsync('12345678').catch(function (e) {
+  // Handle game change failure
+});
+```
+* 抛出 USER_INPUT
+* 抛出 INVALID_PARAM
+* 抛出 PENDING_REQUEST
+* 抛出 CLIENT_REQUIRES_UPDATE
+
 返回值 [Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) 当Facebook将控制权归还给游戏时返回 promise
 
 ### quit()
@@ -690,14 +724,21 @@ var logged = FBInstant.logEvent(
 
 ### onPause()
 设置一个暂停事件触发时调用的方法。
+
 **参数**
 
 •	func **Function**  当暂停事件触发时调用的方法。
 
+```
+FBInstant.onPause(function() {
+  console.log('Pause event was triggered!');
+})
+```
+
 返回值 **void**
 
 ### getInterstitialAdAsync()
-尝试创建一个交互广告的实例。可以预加载和提交这个实例。
+尝试创建插屏广告的实例。此实例可在之后预载和显示。
 
 **参数**
 
@@ -719,7 +760,7 @@ FBInstant.getInterstitialAdAsync(
 返回值： **Promise** 成功了返回 resolves，失败了返回 reject
 
 ### getRewardedVideoAsync()
-尝试创建一个激励视频广告的实例。可以预加载和提交这个实例。
+尝试创建一个激励视频广告的实例。此实例可在之后预载和显示。
 
 **参数**
 
