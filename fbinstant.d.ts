@@ -22,7 +22,7 @@ declare class FBInstant {
      * 获取运行的平台信息: IOS | ANDROID | WEB | MOBILE_WEB
      * The platform on which the game is currently running
      */
-    static getPlatform(): Platform;
+    static getPlatform(): FBPlatform;
     /**
      * SDK 的版本号，例如: '4.1'
      * The string representation of this SDK version.
@@ -238,7 +238,7 @@ declare namespace FBInstant {
          * 选择游戏场景
          * Opens a context selection dialog for the player. 
          */
-        chooseAsync(options?: { filter?: ContextFilter[], maxSize?: number, minSize?: number }): Promise<void>;
+        chooseAsync(options?: { filter?: FBContextFilter[], maxSize?: number, minSize?: number }): Promise<void>;
         /**
          * 创建游戏场景
          * Attempts to create or switch into a context between a specified player and the current player. 
@@ -589,6 +589,6 @@ declare namespace FBInstant {
         getID(): string;
     }
 }
-type ContextFilter = "NEW_CONTEXT_ONLY" | "INCLUDE_EXISTING_CHALLENGES";
-type Platform = "IOS" | "ANDROID" | "WEB" | "MOBILE_WEB";
+type FBContextFilter = "NEW_CONTEXT_ONLY" | "INCLUDE_EXISTING_CHALLENGES";
+type FBPlatform = "IOS" | "ANDROID" | "WEB" | "MOBILE_WEB";
 
