@@ -147,7 +147,7 @@ declare namespace FBInstant {
          * 获取玩家的唯一ID和一个签名，签名用来验证该 ID 来自 Facebook ，没有被篡改。
          * Fetch the player's unique identifier along with a signature that verifies that the identifier indeed comes from Facebook without being tampered with
          */
-        getSignedPlayerInfoAsync(requestPayload: string): Promise<SignedPlayerInfo>;
+        getSignedPlayerInfoAsync(requestPayload?: string): Promise<SignedPlayerInfo>;
         /**
          * 返回一个 promise，表示玩家是否可以与游戏机器人对战。
          * Returns a promise that resolves with whether the player can subscribe to the game bot or not.
