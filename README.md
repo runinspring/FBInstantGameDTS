@@ -763,7 +763,7 @@ FBInstant.shareAsync({
 
 **参数**
 
-•	payload **CustomUpdatePayload **  要更新的内容
+•	payload **CustomUpdatePayload | LeaderboardUpdatePayload**  要更新的内容
 
 代码示例：
 
