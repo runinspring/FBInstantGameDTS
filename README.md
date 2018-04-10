@@ -1,4 +1,4 @@
-# Facebook InstantGame API v6.1 说明
+# Facebook Instant Games API v6.1 说明
 
 # FBInstant
 
