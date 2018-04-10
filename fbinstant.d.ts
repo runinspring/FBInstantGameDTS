@@ -74,7 +74,7 @@ declare class FBInstant {
      * 通知 Facebook 在游戏中发生的更新
      * Informs Facebook of an update that occurred in the game. 
      */
-    static updateAsync(payload: FBInstant.CustomUpdatePayload): Promise<void>;
+    static updateAsync(payload: FBInstant.CustomUpdatePayload | FBInstant.LeaderboardUpdatePayload): Promise<void>;
     /**
      * 请求客户端切换到另一个小游戏
      * Request that the client switch to a different Instant Game. 
@@ -412,6 +412,27 @@ declare namespace FBInstant {
          * Specifies notification setting for the custom update.
          */
         notification?: string;
+    }
+    /**
+     * 表示 FBInstant.updateAsync 的一项排行榜更新
+     * Represents a leaderboard update for FBInstant.updateAsync.
+     */
+    interface LeaderboardUpdatePayload {
+        /**
+         * 对于排行榜更新，此属性应为 “LEADERBOARD”
+         * For a leaderboard update, this should be 'LEADERBOARD'. text. 
+         */
+        action: string;
+        /**
+         * 更新排行榜的名称。
+         * The name of the leaderboard to feature in the update.
+         */
+        name: string;
+        /**
+         * 可选的文本消息
+         * Optional text message
+         */
+        text?: string;
     }
     interface APIError {
         /**
