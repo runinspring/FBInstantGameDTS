@@ -113,13 +113,13 @@ declare class FBInstant {
      * Attempt to create an instance of interstitial ad. This instance can then be preloaded and presented.
      * @param placementID 在 Audience Network 设置的位置ID
      */
-    static getInterstitialAdAsync(placementID: String): Promise<void>;
+    static getInterstitialAdAsync(placementID: String): Promise<FBInstant.AdInstance>;
     /**
      * 创建激励视频广告
      * Attempt to create an instance of rewarded video. This instance can then be preloaded and presented.
      * @param placementID 在 Audience Network 设置的位置ID
      */
-    static getRewardedVideoAsync(placementID: String): Promise<void>;
+    static getRewardedVideoAsync(placementID: String): Promise<FBInstant.AdInstance>;
     /**
      * 尝试将当前玩家与等待他人加入游戏的其他玩家进行匹配
      * Attempts to match the current player with other users looking for people to play with
@@ -137,6 +137,20 @@ declare class FBInstant {
     static getLeaderboardAsync(name: string): Promise<FBInstant.Leaderboard>;
 }
 declare namespace FBInstant {
+    interface AdInstance {
+        /**
+         * 获取广告位id
+         */
+        getPlacementID(): string;
+        /**
+         * 加载广告资源
+         */
+        loadAsync(): Promise<void>;
+        /**
+         * 播放广告
+         */
+        showAsync(): Promise<void>;
+    }
     interface FBPlayer {
         /**
          * 玩家的唯一标识ID.
