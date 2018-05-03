@@ -572,6 +572,11 @@ declare namespace FBInstant {
          * Retrieves a set of leaderboard entries, ordered by score ranking in the leaderboard.
          */
         getEntriesAsync(count: number, offset: number): Promise<LeaderboardEntry>;
+        /**
+         * 检索与当前玩家分数相邻的玩家(包括当前玩家)的排行榜分录，按照玩家的级别排序。
+         * Retrieves the leaderboard score entries of the current player's connected players (including the current player), ordered by local rank within the set of connected players.
+         */
+        getConnectedPlayerEntriesAsync(count: number, offset: number): Promise<LeaderboardEntry>;
     }
     interface LeaderboardEntry {
         /**
