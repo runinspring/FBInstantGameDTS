@@ -1,6 +1,6 @@
 # Facebook Instant Games API 说明
 
-fbinstant.d.ts for sdk v6.1
+fbinstant.d.ts for sdk v6.2
 
 # FBInstant
 
